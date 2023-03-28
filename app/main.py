@@ -1,13 +1,21 @@
 from typing import Optional
 from random import randrange
-from fastapi import FastAPI, Response, status, HTTPException
+from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
+from sqlalchemy.orm import Session
+from app import models
+from app.database import engine, get_db
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+
+
 
 
 class Post(BaseModel):
@@ -52,6 +60,9 @@ def find_post_index(id):
 def root():
     return {"messages": "Hello World!"}
 
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+    return {"status": "success"}
 
 @app.get('/posts')
 def get_posts():

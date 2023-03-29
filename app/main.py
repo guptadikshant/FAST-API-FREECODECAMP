@@ -15,9 +15,6 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-
-
-
 class Post(BaseModel):
     title: str
     content: str
@@ -60,9 +57,11 @@ def find_post_index(id):
 def root():
     return {"messages": "Hello World!"}
 
+
 @app.get("/sqlalchemy")
 def test_posts(db: Session = Depends(get_db)):
     return {"status": "success"}
+
 
 @app.get('/posts')
 def get_posts():

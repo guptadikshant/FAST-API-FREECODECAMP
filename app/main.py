@@ -6,7 +6,9 @@ import time
 from sqlalchemy.orm import Session
 from app import models
 from app.database import engine, get_db
-from app.schemas import Post, PostCreate
+from app.schemas import Post, PostCreate, UserCreate, UserOut
+from app.utils import hash
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -31,7 +33,7 @@ def root():
     return {"messages": "Hello World!"}
 
 
-@app.get('/posts',response_model=List[Post])
+@app.get('/posts', response_model=List[Post])
 def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
@@ -92,3 +94,16 @@ def update_post(id: int, post: PostCreate, db: Session = Depends(get_db)):
     updated_post.update(post.dict(), synchronize_session=False)
     db.commit()
     return updated_post.first()
+
+
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserOut)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    hashed_password = hash(user.password)
+    user.password = hashed_password
+
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+

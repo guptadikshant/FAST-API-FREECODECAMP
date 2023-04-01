@@ -56,11 +56,19 @@ def delete_post(id: int,
     """
     Request to delete a post
     """
-    deleted_post = db.query(models.Post).filter(models.Post.id == id)
-    if deleted_post is None:
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+
+    post = post_query.first()
+
+    if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id {id} does not exist")
-    deleted_post.delete(synchronize_session=False)
+
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Not Authorized to perform the action")
+    
+    post_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -78,6 +86,11 @@ def update_post(id: int,
     if posts is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id {id} does not exist")
+    
+    if posts.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Not Authorized to perform the action")
+
     updated_post.update(post.dict(), synchronize_session=False)
     db.commit()
     return updated_post.first()

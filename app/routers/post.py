@@ -28,7 +28,7 @@ def create_posts(post: PostCreate,
     Request to create a new post
     """
     post_dict = post.dict()
-    new_post = models.Post(**post_dict)
+    new_post = models.Post(owner_id=current_user.id,**post_dict)
     db.add(new_post)
     db.commit()
     db.refresh(new_post)

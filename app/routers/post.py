@@ -2,7 +2,7 @@ from fastapi import Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from typing import List
 from app.database import get_db
-from app import models
+from app import models,outh2
 from app.schemas import Post, PostCreate
 
 router = APIRouter(
@@ -11,19 +11,22 @@ router = APIRouter(
 )
 
 @router.get('/', response_model=List[Post])
-def get_posts(db: Session = Depends(get_db)):
-    # cursor.execute("""SELECT * FROM posts""")
-    # posts = cursor.fetchall()
+def get_posts(db: Session = Depends(get_db),
+              user_id:int = Depends(outh2.get_current_user)):
+    """
+    Request to get all posts
+    """
     posts = db.query(models.Post).all()
     return posts
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=Post)
-def create_posts(post: PostCreate, db: Session = Depends(get_db)):
-    # cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s,%s,%s) RETURNING *""",
-    #                (post.title, post.content, post.published))
-    # new_post = cursor.fetchone()
-    # conn.commit()
+def create_posts(post: PostCreate, 
+                 db: Session = Depends(get_db), 
+                 user_id:int = Depends(outh2.get_current_user)):
+    """
+    Request to create a new post
+    """
     post_dict = post.dict()
     new_post = models.Post(**post_dict)
     db.add(new_post)
@@ -33,9 +36,12 @@ def create_posts(post: PostCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/{id}", response_model=Post)
-def get_post(id: int, response: Response, db: Session = Depends(get_db)):
-    # cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
-    # post = cursor.fetchone()
+def get_post(id: int, response: Response, 
+             db: Session = Depends(get_db),
+             user_id:int = Depends(outh2.get_current_user)):
+    """
+    Request to get a single post
+    """
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -44,10 +50,12 @@ def get_post(id: int, response: Response, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session = Depends(get_db)):
-    # cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING * """, (str(id)))
-    # deleted_post = cursor.fetchone()
-    # conn.commit()
+def delete_post(id: int, 
+                db: Session = Depends(get_db),
+                user_id:int = Depends(outh2.get_current_user)):
+    """
+    Request to delete a post
+    """
     deleted_post = db.query(models.Post).filter(models.Post.id == id)
     if deleted_post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -58,11 +66,13 @@ def delete_post(id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model=Post)
-def update_post(id: int, post: PostCreate, db: Session = Depends(get_db)):
-    # cursor.execute(""" UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING * """,
-    #                (post.title, post.content, post.published, str(id)))
-    # updated_post = cursor.fetchone()
-    # conn.commit()
+def update_post(id: int, 
+                post: PostCreate, 
+                db: Session = Depends(get_db), 
+                user_id:int = Depends(outh2.get_current_user)):
+    """
+    Request to update a post
+    """
     updated_post = db.query(models.Post).filter(models.Post.id == id)
     posts = updated_post.first()
     if posts is None:

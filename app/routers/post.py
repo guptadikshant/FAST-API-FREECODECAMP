@@ -12,7 +12,7 @@ router = APIRouter(
 
 @router.get('/', response_model=List[Post])
 def get_posts(db: Session = Depends(get_db),
-              user_id:int = Depends(outh2.get_current_user)):
+              current_user:int = Depends(outh2.get_current_user)):
     """
     Request to get all posts
     """
@@ -23,7 +23,7 @@ def get_posts(db: Session = Depends(get_db),
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=Post)
 def create_posts(post: PostCreate, 
                  db: Session = Depends(get_db), 
-                 user_id:int = Depends(outh2.get_current_user)):
+                 current_user:int = Depends(outh2.get_current_user)):
     """
     Request to create a new post
     """
@@ -38,7 +38,7 @@ def create_posts(post: PostCreate,
 @router.get("/{id}", response_model=Post)
 def get_post(id: int, response: Response, 
              db: Session = Depends(get_db),
-             user_id:int = Depends(outh2.get_current_user)):
+             current_user:int = Depends(outh2.get_current_user)):
     """
     Request to get a single post
     """
@@ -52,7 +52,7 @@ def get_post(id: int, response: Response,
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, 
                 db: Session = Depends(get_db),
-                user_id:int = Depends(outh2.get_current_user)):
+                current_user:int = Depends(outh2.get_current_user)):
     """
     Request to delete a post
     """
@@ -69,7 +69,7 @@ def delete_post(id: int,
 def update_post(id: int, 
                 post: PostCreate, 
                 db: Session = Depends(get_db), 
-                user_id:int = Depends(outh2.get_current_user)):
+                current_user:int = Depends(outh2.get_current_user)):
     """
     Request to update a post
     """

@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from app import models
 from app.database import engine
 from app.routers import post, users,auth,votes
-from app.config import settings
 
-models.Base.metadata.create_all(bind=engine)
+
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
